@@ -10,7 +10,7 @@ module("wizlite");
 test("Simple add user wiz test (2 sequential steps)", function () {
     var addUserStep = new WizStep({
         name: 'addUserStep',
-        onEnter: function(data) {
+        onStart: function(data) {
 
         },
         onDone: function() {
@@ -24,28 +24,29 @@ test("Simple add user wiz test (2 sequential steps)", function () {
         }
     });
 
-    equal(addUserStep.name, 'addUserStep', 'Check that name for add user step was correctly assigned')
+    equal(addUserStep.name, 'addUserStep', 'Check that name for add user step was correctly assigned');
 
     var johnStep = new WizStep({
-        onEnter: function(data) {
+        name: 'johnStep',
+        onStart: function(data) {
 
         }
     });
 
     // helpers
     function isJohnEntered() {
-        return w.storage.firstName == 'John';
+        return w.getStorage().firstName == 'John';
 
     };
-
 
     var w = new Wiz({
         name: 'wiz',
         steps: {
             addUser: {
+                first: true,
                 step: addUserStep,
                 onNext: function() {
-                    if (isJohnEntered()) {w.goTo('johnWelcome')};
+                    if (isJohnEntered()) {return johnStep};
                 }
             },
             johnWelcome: {
@@ -61,6 +62,9 @@ test("Simple add user wiz test (2 sequential steps)", function () {
 
     equal(w.getCurrentStep().name, 'addUserStep', 'Check that first step is the first');
     w.next();
+
+    equal(w.getStorage().firstName, 'John', 'Check that storage is correctly populated');
+    equal(w.getCurrentStep().name, 'johnStep', 'Check that wizard goes to john step');
 
 
 });
