@@ -12,6 +12,8 @@ function Wiz(config)
 
     this.configSteps = this.config.steps;
     this.steps = [];
+    this.stepHistory = [];
+
     this.currentStep;
     this.storage = new WizStorage();
 }
@@ -53,6 +55,7 @@ Wiz.prototype = {
         this.storage.updateStorage(stepResult);
 
         this.currentStep = getNextStep();
+        this.addStepToHistory(prevStep);
 
         function getNextStep() {
             for (var stepName in self.configSteps) {
@@ -63,11 +66,20 @@ Wiz.prototype = {
         }
 
     },
+    back: function() {
+        this.currentStep = this.getPreviousStep();
+    },
     getStorage: function() {
         return this.storage.getStorage();
     },
+    addStepToHistory: function(step) {
+        this.stepHistory.push(step);
+    },
     getCurrentStep : function() {
         return this.currentStep;
+    },
+    getPreviousStep: function() {
+        return this.stepHistory.pop();
     }
 }
 

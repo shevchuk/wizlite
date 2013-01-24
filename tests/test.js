@@ -7,20 +7,13 @@
  */
 module("wizlite");
 
-test("Simple add user wiz test (2 sequential steps)", function () {
+test("Simple add user wiz test", function () {
     var addUserStep = new WizStep({
         name: 'addUserStep',
         onStart: function(data) {
-
         },
         onDone: function() {
             return {firstName: 'John'};
-        },
-        onBack: function() {
-
-        },
-        onCancel: function() {
-
         }
     });
 
@@ -65,6 +58,7 @@ test("Simple add user wiz test (2 sequential steps)", function () {
 
     equal(w.getStorage().firstName, 'John', 'Check that storage is correctly populated');
     equal(w.getCurrentStep().name, 'johnStep', 'Check that wizard goes to john step');
+    w.back();
 
-
+    equal(w.getCurrentStep().name, 'addUserStep', 'Check that back function works')
 });
