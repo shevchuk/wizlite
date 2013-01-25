@@ -158,7 +158,12 @@ function createDeviceCombo() {
 }
 
 function makeToolbar() {
+    var back = new Element('button', {
+        text: 'Back',
+        events: {
 
+        }
+    });
 }
 
 function extend(src, dst) {
