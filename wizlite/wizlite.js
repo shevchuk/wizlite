@@ -55,6 +55,9 @@ Wiz.prototype = {
         this.storage.updateStorage(stepResult);
 
         this.currentStep = getNextStep();
+
+        this.currentStep.onStart && this.currentStep.onStart(this.getStorage());
+
         this.addStepToHistory(prevStep);
 
         function getNextStep() {
@@ -117,6 +120,7 @@ function WizStep(config)
 
     this.name = this.config.name || 'Unnamed';
     this.getResult = this.config.onDone;
+    this.onStart = this.config.onStart;
 }
 
 WizStep.prototype = {

@@ -22,6 +22,7 @@ test("Simple add user wiz test", function () {
     var johnStep = new WizStep({
         name: 'johnStep',
         onStart: function(data) {
+            deepEqual({firstName: 'John'}, data);
         }
     });
 
@@ -64,7 +65,10 @@ test("Simple add user wiz test", function () {
 
 test('DL wiz test', function() {
     var selectDeviceStep = new WizStep({
-        
+        name: 'selectDeviceStep',
+        onDone: function() {
+            return {device: 'Polycom'};
+        }
     });
 
     var w = new Wiz({
@@ -77,4 +81,6 @@ test('DL wiz test', function() {
         }
     });
 
+    w.start();
+    equal(w.getCurrentStep().name, 'selectDeviceStep', 'Check that first step is the first');
 });
