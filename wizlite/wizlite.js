@@ -58,6 +58,10 @@ Wiz.prototype = {
         this.addStepToHistory(prevStep);
 
         function getNextStep() {
+            return self.configSteps[getNextStepName()].step;
+        }
+
+        function getNextStepName() {
             for (var stepName in self.configSteps) {
                 if (self.getCurrentStep().name == self.configSteps[stepName].step.name) {
                     return self.configSteps[stepName].onNext();

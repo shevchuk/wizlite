@@ -22,7 +22,6 @@ test("Simple add user wiz test", function () {
     var johnStep = new WizStep({
         name: 'johnStep',
         onStart: function(data) {
-
         }
     });
 
@@ -39,7 +38,7 @@ test("Simple add user wiz test", function () {
                 first: true,
                 step: addUserStep,
                 onNext: function() {
-                    if (isJohnEntered()) {return johnStep};
+                    if (isJohnEntered()) {return 'johnWelcome'};
                 }
             },
             johnWelcome: {
@@ -61,4 +60,21 @@ test("Simple add user wiz test", function () {
     w.back();
 
     equal(w.getCurrentStep().name, 'addUserStep', 'Check that back function works')
+});
+
+test('DL wiz test', function() {
+    var selectDeviceStep = new WizStep({
+        
+    });
+
+    var w = new Wiz({
+        name: 'dl',
+        steps: {
+            selectDevice: {
+                first: true,
+                step: selectDeviceStep
+            }
+        }
+    });
+
 });
