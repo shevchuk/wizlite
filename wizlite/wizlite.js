@@ -50,7 +50,11 @@ Wiz.prototype = {
         var self = this;
 
         var prevStep = this.getCurrentStep();
-        var stepResult = prevStep.getResult();
+        var stepResult = {};
+
+        if (prevStep.getResult) {
+            stepResult = prevStep.getResult();
+        }
 
         this.storage.updateStorage(stepResult);
 
@@ -60,24 +64,46 @@ Wiz.prototype = {
 
         this.addStepToHistory(prevStep);
 
-        function getNextStep() {
-            return self.configSteps[getNextStepName()].step;
-        }
+        this.onStepChange(this.currentStep);
 
-        function getNextStepName() {
-            for (var stepName in self.configSteps) {
-                if (self.getCurrentStep().name == self.configSteps[stepName].step.name) {
-                    return self.configSteps[stepName].onNext();
-                }
+        function getNextStep() {
+            if (!self.configSteps[self.getNextStepName()])
+            {
+                return false;
+            } else
+            {
+                return self.configSteps[self.getNextStepName()].step;
             }
         }
-
+    },
+    getNextStepName : function() {
+        for (var stepName in this.configSteps) {
+            if (this.getCurrentStep().name == this.configSteps[stepName].step.name) {
+                if (this.configSteps[stepName].onNext)
+                    return this.configSteps[stepName].onNext();
+            }
+        }
     },
     back: function() {
         this.currentStep = this.getPreviousStep();
+        this.onStepChange(this.currentStep);
+    },
+    getAvailableMoves: function() {
+        var next = !!this.getNextStepName();
+        var back = !!this.stepHistory.length;
+        return {
+            next: next,
+            back: back
+        };
+    },
+    onStepChange: function() {
+
     },
     getStorage: function() {
         return this.storage.getStorage();
+    },
+    updateStorage: function(data) {
+        this.storage.updateStorage(data);
     },
     addStepToHistory: function(step) {
         this.stepHistory.push(step);

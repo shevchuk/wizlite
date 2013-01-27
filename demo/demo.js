@@ -1,6 +1,20 @@
 window.addEvent('domready', function(){
-    makeWizard();
+    buildForm();
 });
+
+function buildForm() {
+    var wizard = makeWizard();
+    wizard.start();
+
+    updateStepForm(wizard);    // first step
+
+    wizard.onStepChange = function (newStep) {
+        updateStepForm(wizard);
+    };
+
+    var toolbar = makeToolbar(wizard.next.bind(wizard), wizard.back.bind(wizard));
+    $('toolbar').adopt(toolbar);
+}
 
 function makeWizard() {
     var selectDeviceStep    = makeSelectDeviceStep();
@@ -49,8 +63,7 @@ function makeWizard() {
         }
     });
 
-    w.start();
-    w.next();
+    return w;
 
     function chooseFreePlan() {
         w.updateStorage({plan: 'free'});
@@ -69,12 +82,21 @@ function makeWizard() {
     }
 }
 
+function updateStepForm(wizard) {
+    $('form').empty().adopt(wizard.getCurrentStep());
+}
 
 
 function makeSummaryStep() {
+    var ws = new WizStep({
+        name: 'summaryStep'
+    });
+
     var div = new Element('div', {
         'html' : '<h4>Summary</h4>'
     });
+
+    extend(ws, div);
 
     return div;
 }
@@ -119,18 +141,30 @@ function makePolycomPlanStep() {
 
 // helpers
 function createPlanDisplay(text) {
+    var ws = new WizStep({
+        name: text+'step'
+    });
+
     var div = new Element('div', {
         'html' : '<h5>' + text + ' plan display<h5/>'
     });
+
+    extend(ws, div);
 
     return div;
 }
 
 function createE911Step(stepName) {
+    var ws = new WizStep({
+        name: stepName+'E911step'
+    });
+
+
     var div = new Element('div', {
         'html' : '<h5>E911: ' + stepName + '<h5/>'
     });
 
+    extend(ws, div);
     return div;
 }
 function createDeviceCombo() {
@@ -157,13 +191,32 @@ function createDeviceCombo() {
     return combo;
 }
 
-function makeToolbar() {
+function makeToolbar(onNext, onBack) {
+    var div = new Element('div');
     var back = new Element('button', {
+        id: 'backButton',
         text: 'Back',
         events: {
-
+            'click' : function() {
+                onBack();
+            }
         }
     });
+
+    var next = new Element('button', {
+        id: 'nextButton',
+        text: 'Next',
+        events: {
+            'click' : function() {
+                onNext();
+            }
+        }
+    });
+
+
+    div.adopt(back);
+    div.adopt(next);
+    return div;
 }
 
 function extend(src, dst) {

@@ -7,24 +7,27 @@
  */
 module("wizlite");
 
-test("Simple add user wiz test", function () {
-    var addUserStep = new WizStep({
-        name: 'addUserStep',
-        onStart: function(data) {
-        },
-        onDone: function() {
-            return {firstName: 'John'};
-        }
-    });
 
-    equal(addUserStep.name, 'addUserStep', 'Check that name for add user step was correctly assigned');
+function createJohnWizard() {
+    function createAddUserStep() {
+        return new WizStep({
+            name: 'addUserStep',
+            onStart: function(data) {
+            },
+            onDone: function() {
+                return {firstName: 'John'};
+            }
+        });
+    }
 
-    var johnStep = new WizStep({
-        name: 'johnStep',
-        onStart: function(data) {
-            deepEqual({firstName: 'John'}, data);
-        }
-    });
+    function createJohnStep() {
+        return new WizStep({
+            name: 'johnStep',
+            onStart: function(data) {
+                deepEqual({firstName: 'John'}, data);
+            }
+        });
+    }
 
     // helpers
     function isJohnEntered() {
@@ -37,19 +40,25 @@ test("Simple add user wiz test", function () {
         steps: {
             addUser: {
                 first: true,
-                step: addUserStep,
+                step: createAddUserStep(),
                 onNext: function() {
                     if (isJohnEntered()) {return 'johnWelcome'};
                 }
             },
             johnWelcome: {
-                step: johnStep,
+                step: createJohnStep(),
                 onNext: function() {
 
                 }
             }
         }
     });
+
+    return w;
+}
+
+test("Simple add user wiz test", function () {
+    var w = createJohnWizard();
 
     w.start();
 
@@ -63,7 +72,7 @@ test("Simple add user wiz test", function () {
     equal(w.getCurrentStep().name, 'addUserStep', 'Check that back function works')
 });
 
-test('DL wiz test', function() {
+test('getAvailableMoves test', function() {
     var selectDeviceStep = new WizStep({
         name: 'selectDeviceStep',
         onDone: function() {
@@ -76,11 +85,40 @@ test('DL wiz test', function() {
         steps: {
             selectDevice: {
                 first: true,
-                step: selectDeviceStep
+                step: selectDeviceStep,
+                onNext: function() {
+                    return 'selectDevice'; // loop the cycle
+                }
             }
         }
     });
 
     w.start();
+
+    deepEqual(w.getAvailableMoves(), {back: false, next: true}, 'Check available moves test');
     equal(w.getCurrentStep().name, 'selectDeviceStep', 'Check that first step is the first');
+
+    w.next();
+    deepEqual(w.getAvailableMoves(), {back: true, next: true}, 'Check available moves test after next');
+    w.back();
+    deepEqual(w.getAvailableMoves(), {back: false, next: true}, 'Check available moves test after back');
+});
+
+test('onStepChange test', function() {
+    var w = createJohnWizard();
+
+    w.start();
+    equal(w.getCurrentStep().name, 'addUserStep', 'Check that first step is the first');
+    w.onStepChange = function(newStep) {
+        equal(newStep.name, 'johnStep', 'onStepChanged correct arg');
+    }
+    w.next();
+    w.onStepChange = function(newStep) {
+        equal(newStep.name, 'addUserStep', 'onStepChanged correct arg');
+    }
+    w.back();
+    w.onStepChange = function(newStep) {}
+    w.next();
+    w.next();
+    w.next();
 });
