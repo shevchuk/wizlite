@@ -89,7 +89,16 @@ Wiz.prototype = {
         this.onStepChange(this.currentStep);
     },
     getAvailableMoves: function() {
-        var next = !!this.getNextStepName();
+        var self = this;
+        function hasNextStepFunction() {
+            for (var stepName in self.configSteps) {
+                if (self.getCurrentStep().name == self.configSteps[stepName].step.name) {
+                    if (self.configSteps[stepName].onNext)
+                        return self.configSteps[stepName].onNext;
+                }
+            }
+        }
+        var next = !!hasNextStepFunction();
         var back = !!this.stepHistory.length;
         return {
             next: next,

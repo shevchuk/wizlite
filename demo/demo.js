@@ -4,16 +4,19 @@ window.addEvent('domready', function(){
 
 function buildForm() {
     var wizard = makeWizard();
+    var toolbar = makeToolbar(wizard.next.bind(wizard), wizard.back.bind(wizard));
     wizard.start();
 
     updateStepForm(wizard);    // first step
 
     wizard.onStepChange = function (newStep) {
         updateStepForm(wizard);
+        updateToolbar(wizard);
     };
 
-    var toolbar = makeToolbar(wizard.next.bind(wizard), wizard.back.bind(wizard));
+
     $('toolbar').adopt(toolbar);
+    updateToolbar(wizard);
 }
 
 function makeWizard() {
@@ -86,6 +89,10 @@ function updateStepForm(wizard) {
     $('form').empty().adopt(wizard.getCurrentStep());
 }
 
+function updateToolbar(wizard) {
+    $('backButton').setStyle('display', wizard.getAvailableMoves().back?'block':'none');
+    $('nextButton').setStyle('display', wizard.getAvailableMoves().next?'block':'none');
+}
 
 function makeSummaryStep() {
     var ws = new WizStep({
@@ -218,6 +225,8 @@ function makeToolbar(onNext, onBack) {
     div.adopt(next);
     return div;
 }
+
+
 
 function extend(src, dst) {
     for (var k in src) {
